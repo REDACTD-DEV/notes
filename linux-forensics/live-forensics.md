@@ -14,5 +14,5 @@ Command             | Description
 `dmesg`             | Displays system boot messages and other kernel-related messages
 `who`               | Displays information about users currently logged into the system
 `uname -a`          | Displays system information such as the kernel version, OS version, and processor type
-`ifconfig -a || ip a`| Displays information about network interfaces and their configuration
+`ifconfig -a \|\| ip a`| Displays information about network interfaces and their configuration
 `find /directory -type f -mtime -1 -print`| Finds files in a specified directory modified within the last day and displays their paths
