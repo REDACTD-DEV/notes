@@ -20,25 +20,43 @@ sudo mount /mnt/EWF-mount/ewf1 /mnt/image-mount -o ro,loop,show_sys_files,stream
 # ls -lah 
 ```
 
-Mount DD images to a SIFT/Kali machine for analysis
+Mount AFF images to a SIFT/Kali machine for analysis
 ```bash
+# Install the AFFLIB tools
 sudo apt-get install afflib-tools
+
+# Create a directory for the mounted image file
 sudo mkdir /mnt/fuse
+
+# Mount the disk image file onto the directory using AFFUSE tool
 sudo affuse ~/Desktop/Image\ Files/able_3.000 /mnt/fuse
-sudo mmls /mnt/fuse/able_3.000.raw     
-sudo mkdir -p /media/able/ext4_fs0      
-sudo mkdir -p /media/able/ext4_fs1      
-sudo mkdir -p /media/able/ext4_fs2      
-sudo chown -R kali:kali /media/able 
-sudo losetup -f -o $((2048*512)) /mnt/fuse/able_3.000.raw     
+
+# List the partition layout of the mounted disk image using MMLS tool
+sudo mmls /mnt/fuse/able_3.000.raw
+
+# Create directories for the loop devices to be mounted on
+sudo mkdir -p /media/able/ext4_fs0
+sudo mkdir -p /media/able/ext4_fs1
+sudo mkdir -p /media/able/ext4_fs2
+
+# Change the ownership of the mount point directories to the user 'kali'
+sudo chown -R kali:kali /media/able
+
+# Set up three loop devices for the disk image file at different offsets
+# The '-f' option tells losetup to use the first available loop device
+# The '-o' option specifies the offset in bytes where the loop device should start
+sudo losetup -f -o $((2048*512)) /mnt/fuse/able_3.000.raw
 losetup -a
-sudo losetup -f -o $((104448*512)) /mnt/fuse/able_3.000.raw   
-losetup -a  
-sudo losetup -f -o $((571392*512)) /mnt/fuse/able_3.000.raw    
+sudo losetup -f -o $((104448*512)) /mnt/fuse/able_3.000.raw
 losetup -a
-sudo mount /dev/loop0 /media/able/ext4_fs0     
-sudo mount /dev/loop1 /media/able/ext4_fs1     
-sudo mount /dev/loop2 /media/able/ext4_fs2     
+sudo losetup -f -o $((571392*512)) /mnt/fuse/able_3.000.raw
+losetup -a
+
+# Mount the loop devices as ext4 filesystems on the directories created earlier
+sudo mount /dev/loop0 /media/able/ext4_fs0
+sudo mount /dev/loop1 /media/able/ext4_fs1
+sudo mount /dev/loop2 /media/able/ext4_fs2
+  
 ```
 
 Pull Firefox history
