@@ -61,7 +61,7 @@ sudo mount /dev/loop2 /media/able/ext4_fs2
 
 Pull Firefox history
 ```bash
-sqlite3 places.sqlite "SELECT datetime(last_visit_date/1000000,'unixepoch','localtime'),url FROM moz_places"
+sqlite3 places.sqlite < firefox-history.sql
 ```
 
 SQL command that closely matches NirSoft BrowsingHistoryView
@@ -72,4 +72,18 @@ SELECT datetime(last_visit_date/1000000, 'unixepoch') AS VisitTime, -- Select th
        visit_count AS VisitCount -- Select the visit count column and rename it as VisitCount
 FROM moz_places -- Select data from the moz_places table
 ORDER BY last_visit_date ASC;
+```
+
+Pull Chrome history
+```bash
+sqlite3 ~/.config/google-chrome/Default/ < chrome-history.sql
+```
+
+```sql
+SELECT last_visit_time, -- Select the last visit time column from the urls table
+       datetime(last_visit_time / 1000000 - 11644473600, 'unixepoch', 'localtime'), -- Convert the last visit time value from Unix epoch time to local time using the datetime function, and rename the column as VisitTime
+       url, -- Select the url column from the urls table
+       title -- Select the title column from the urls table
+FROM urls -- Select data from the urls table
+ORDER BY last_visit_time DESC; -- Sort the data by the last visit time column in descending order
 ```
