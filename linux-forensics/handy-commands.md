@@ -64,7 +64,6 @@ Pull Firefox history
 sqlite3 places.sqlite < firefox-history.sql
 ```
 
-SQL command that closely matches NirSoft BrowsingHistoryView
 ```sql
 SELECT datetime(last_visit_date/1000000, 'unixepoch') AS VisitTime, -- Select the last visit date column in human-readable format and rename it as VisitTime
        url AS Url, -- Select the URL column and rename it as Url
