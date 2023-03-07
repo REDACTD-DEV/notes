@@ -66,33 +66,10 @@ sqlite3 places.sqlite "SELECT datetime(last_visit_date/1000000,'unixepoch','loca
 
 SQL command that closely matches NirSoft BrowsingHistoryView
 ```sql
--- This query selects browsing history data from the Firefox web browser database and formats it for use in Nirsoft BrowsingHistoryView tool
-
-SELECT 
-    -- This column converts the timestamp of each history entry from microseconds to a human-readable datetime format using the Unix epoch as the reference time
-    datetime(moz_historyvisits.visit_date/1000000,'unixepoch') AS VisitTime, 
-    -- This column contains the URL associated with each history entry
-    moz_places.url AS Url, 
-    -- This column contains the title of the page associated with each history entry
-    moz_places.title AS Title, 
-    -- This column contains the domain of the URL associated with each history entry
-    moz_places.rev_host AS Domain, 
-    -- This column contains the number of times each URL has been visited
-    moz_historyvisits.visit_count AS VisitCount, 
-    -- This column contains the "frecency" score of each URL, which is a measure of how frequently and recently a URL has been visited
-    moz_places.frecency AS Frecency, 
-    -- This column specifies that the data is from the Firefox web browser
-    'Firefox' AS WebBrowser 
-FROM 
-    -- This table contains the visit data for each history entry
-    moz_historyvisits 
-JOIN 
-    -- This table contains the URL data for each history entry
-    moz_places ON moz_places.id = moz_historyvisits.place_id 
-WHERE 
-    -- This clause excludes bookmark visits from the results
-    moz_historyvisits.visit_type NOT IN (0, 3) 
-ORDER BY 
-    -- This clause orders the results by the timestamp of each history entry in descending order
-    moz_historyvisits.visit_date DESC;
+SELECT datetime(last_visit_date/1000000, 'unixepoch') AS VisitTime, -- Select the last visit date column in human-readable format and rename it as VisitTime
+       url AS Url, -- Select the URL column and rename it as Url
+       title AS Title, -- Select the title column and rename it as Title
+       visit_count AS VisitCount -- Select the visit count column and rename it as VisitCount
+FROM moz_places -- Select data from the moz_places table
+ORDER BY last_visit_date ASC;
 ```
