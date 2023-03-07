@@ -20,6 +20,27 @@ sudo mount /mnt/EWF-mount/ewf1 /mnt/image-mount -o ro,loop,show_sys_files,stream
 # ls -lah 
 ```
 
+Mount DD images to a SIFT/Kali machine for analysis
+```bash
+sudo apt-get install afflib-tools
+sudo mkdir /mnt/fuse
+sudo affuse ~/Desktop/Image\ Files/able_3.000 /mnt/fuse
+sudo mmls /mnt/fuse/able_3.000.raw     
+sudo mkdir -p /media/able/ext4_fs0      
+sudo mkdir -p /media/able/ext4_fs1      
+sudo mkdir -p /media/able/ext4_fs2      
+sudo chown -R kali:kali /media/able 
+sudo losetup -f -o $((2048*512)) /mnt/fuse/able_3.000.raw     
+losetup -a
+sudo losetup -f -o $((104448*512)) /mnt/fuse/able_3.000.raw   
+losetup -a  
+sudo losetup -f -o $((571392*512)) /mnt/fuse/able_3.000.raw    
+losetup -a
+sudo mount /dev/loop0 /media/able/ext4_fs0     
+sudo mount /dev/loop1 /media/able/ext4_fs1     
+sudo mount /dev/loop2 /media/able/ext4_fs2     
+```
+
 Pull Firefox history
 ```bash
 sqlite3 places.sqlite "SELECT datetime(last_visit_date/1000000,'unixepoch','localtime'),url FROM moz_places"
