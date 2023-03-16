@@ -171,3 +171,10 @@ The files in the **sys** directory are listed in the table below:
 | version-major.txt | Operating system major version                                          |
 | version-minor.txt | Operating system minor version                                          |
 | version-build.txt | Operating system build number                                           |
+
+### .\sys\net
+Contains a listing of active TCP connections similar to netstat -ano
+Does not give connection times like volatility
+
+### .\sys\proc
+The file proc.txt contains a per-pid tree view of the known processes in the system. The view includes all processes including terminated ones.
