@@ -133,3 +133,41 @@ The directory contains a comma separated (csv) files that may be used to import 
 | timeline_thread.csv       | Threading timeline.                           |
 | timeline_web.csv          | Web timeline.                                 |
 | unloaded_modules.csv      | Unloaded modules information.                 |
+
+### .\misc\bitlocker
+The bitlocker plugin is loosely based on the excellent [bitlocker volatility](https://github.com/breppo/Volatility-BitLocker) plugin. The MemProcFS plugin uses the same underlying technique of identifying potential bitlocker keys by pool tagging and other heuristics. The MemProcFS plugin also does some post-processing to increase output quality.
+
+The bitlocker plugin works quite well on Windows 7 and Windows 10/11. Issues however exists on Windows 8 (and early Windows 10) versions where multiple keys may be recovered in error. At least one key should however most often be correct even on Windows 8 and early Windows 10 versions.
+
+In order to mount a recovered bitlocker key it's recommended to use dislocker on a Linux system. Please use the recovered _.fvek_ key.
+```bash
+dislocker -k <recovered_key>.fvek /path/to/disk /path/to/dislocker          
+mount /path/to/dislocker/dislocker-file /path/to/mount
+```
+
+### .\misc\web
+The directory contains web browser related information such as browser history from supported web browsers.
+
+| Supported Browser     |
+| --------------------- |
+| Google Chrome         |
+| Microsoft Edge (new)  |
+| Firefox               |
+
+### .\registry\hive_files
+Entire registry hives that can be processed by other tools like Registry Explorer or RegRipper
+
+### .\sys
+The directory contains directories and files displaying various system information.
+The files in the **sys** directory are listed in the table below:
+| File              | Description                                                             |
+| ----------------- | ----------------------------------------------------------------------- |
+| computername.txt  | Name of the computer                                                    |
+| time-boot.txt     | Time of system boot                                                     |
+| time-current.txt  | Time of system                                                          |
+| timezone.txt      | TimeZone of system                                                      |
+| unique-tag.txt    | MemProcFS derived ID for the current memory image                       |
+| version.txt       | Operating system version on format: major.minor.build                   |
+| version-major.txt | Operating system major version                                          |
+| version-minor.txt | Operating system minor version                                          |
+| version-build.txt | Operating system build number                                           |
