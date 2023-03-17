@@ -42,6 +42,8 @@ DLLs
 ```posh
 #Volatility 3: PID, process, offset, handlevalue, type, grantedaccess, name
 python vol.py -f “/path/to/file” windows.dlllist ‑‑pid <PID>
+#ldrmodules, look for DLL's with FALSE, FALSE, FALSE
+python vol.py -f “/path/to/file” windows.ldrmodules ‑‑pid <PID>
 ```
 
 CMDLINE
@@ -51,7 +53,7 @@ python vol.py -f “/path/to/file” windows.cmdline
 ```
 
 Network Information [^network]
-[^network]:[Why and How to Extract Network Connection Timestamps for DFIR Investigations](https://illusive.com/blog/threat-research-blog/why-and-how-to-extract-network-connection-timestamps-for-dfir-investigations/)
+[^network]:[Network Connection Timestamps in Memory](https://illusive.com/blog/threat-research-blog/why-and-how-to-extract-network-connection-timestamps-for-dfir-investigations/)
 ```posh
 #Network connections associated with the memory dump
 #netscan also includes a creation timestamp becuase it accesses the kernel pool, whereas netstat is usermode
@@ -178,3 +180,45 @@ Does not give connection times like volatility
 
 ### .\sys\proc
 The file proc.txt contains a per-pid tree view of the known processes in the system. The view includes all processes including terminated ones.
+
+### .\sys\services
+Contains information about services extracted from the service control manager (SCM)
+The files in the **sys/services** directory are listed in the table below:
+| File                           | Description                                               |
+| ------------------------------ | --------------------------------------------------------- |
+| __services.txt__               | Summary information about all services listed by ordinal. |
+| by-id/[id]/registry/           | Service registry key.                                     |
+| by-id/[id]/__svcinfo.txt__     | Detailed information about each service.                  |
+| by-name/[name]/registry/       | Service registry key.                                     |
+| by-name/[name]/__svcinfo.txt__ | Detailed information about each service.                  |
+
+### .\sys\tasks
+Contains information about scheduled tasks extracted from the registry.
+
+### .\sys\users
+information about the users on the system.
+```
+   # Username                         SID
+-----------------------------------------
+0000 SANSDFIR                         S-1-5-21-1552841522-3835366585-4197357653-1001
+...
+```
+## MemProcFS-Analyzer
+MemProcFS-Analyzer is a PowerShell script that mounts the memory file and then runs forensic tools against the mount in an automated fashion.
+
+### AmcacheParser [^amcache]
+[^amcache]:[AmcacheParser](https://thesecuritynoob.com/dfir-tools/dfir-tools-amcacheparser-what-is-it-how-to-use/)
+
+Amcache.hve is a small registry hive that stores a wealth of information about recently run applications and programs, including full path, file timestamps, and file SHA1 hash value, it is commonly found at the following location: 
+```C:\Windows\AppCompat\Programs\Amcache.hve```
+
+### AppCompatCacheParser[^AppCompatCacheParser]
+[^AppCompatCacheParser]:[AppCompatCacheParser](https://thesecuritynoob.com/dfir-tools/dfir-tools-amcacheparser-what-is-it-how-to-use-2/)
+
+Shimcache, also known as AppCompatCache, is a component of the Application Compatibility Database, which was created by Microsoft and used by the Windows operating system to identify application compatibility issues. This helps developers troubleshoot legacy functions and contains data related to Windows features. It is used for quick search to decide whether modules need shimming for compatibility or not.
+
+A Shim is a small library that transparently handles the applications interworking’s to provide support for older APIs in a newer environment or vice-versa. Shims allow backwards and forwards compatibility for applications on different software platforms.
+
+The Registry Key related to this cache can be found and located as below.
+
+```HKLM\SYSTEM\CurrentControlSet\Control\SessionManager\AppCompatCache\AppCompatCache```
