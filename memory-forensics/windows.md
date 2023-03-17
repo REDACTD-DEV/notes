@@ -222,3 +222,43 @@ A Shim is a small library that transparently handles the applications interworki
 The Registry Key related to this cache can be found and located as below.
 
 ```HKLM\SYSTEM\CurrentControlSet\Control\SessionManager\AppCompatCache\AppCompatCache```
+
+### EvtxECmd
+A Windows Event Log file parser that bypasses the Windows API.  There are a lot of advantages to a tool such as this; specifically by bypassing the API it doesn't succumb to the 'hiccups' that may occur as a result of files that weren't closed properly or for some other reason isn't formatted in a manner the API agrees with. This is especially important for memory forensics.
+
+### IpInfo CLI
+Takes all public IP addresses found in ``` .\sys\net ``` and generates GeoIP information on them
+
+### lnk_parser
+Yara is run against ``` .\forenisc\ntfs\ ``` to pull all .lnk files. lnk_parser then generates a CSV that contains the following items
+- LNK Full Path
+- LNK Modification Time
+- LNK Access Time
+- LNK Creation Time
+- Target Full Path
+- Working Directory
+- Arguments
+- Relative Path
+- Icon Location
+- Local Base Path
+- Shortcut Key
+- LNK Size
+- MD5
+- SHA1
+- SHA256
+- Entropy
+
+It then uses this CSV to hunt for known suspicious/malicious lnk files. These include:
+- ```C:\Google\AutoIt3.exe```
+- ```C:\Windows\System32\cmd.exe```
+- ```C:\Windows\System32\mshta.exe```
+- ```C:\Windows\System32\msiexec.exe```
+- ```C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe```
+- ```C:\Windows\System32\rundll32.exe```
+- ```C:\Windows\System32\schtasks.exe```
+- ```C:\Windows\System32\wscript.exe```
+- Long arguments (more than 50 characters)
+- Long whitespace (more than 3 characters)
+- LNK contains http:// or https://
+- suspicious LNK file size
+- Entropy > 6.5
