@@ -46,6 +46,7 @@ graph TD;
 - lsasio.exe: When Credential Guard is enabled, the functionality of lsass.exe is split between two processes –
 itself and lsaiso.exe. Most of the functionality stays within lsass.exe, but the important role of safely storing
 account credentials moves to lsaiso.exe
+- explorer.exe: Created by an instance of userinit.exe that exits
 
 | Image Name        | Path                                        | Instances           | User Account | Start Time                      |
 |-------------------|---------------------------------------------|---------------------|--------------|---------------------------------|
