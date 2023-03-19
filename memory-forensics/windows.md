@@ -160,11 +160,14 @@ vol.py -f “/path/to/file” yarascan.yarascan ‑‑yara-file “/path/to/file
 ## MemProcFS [^memprocfs]
 [^memprocfs]:[MemProcFS Wiki](https://github.com/ufrisk/MemProcFS/wiki)
 
+Includes pagefile support. 
+```posh
+memprocfs -Device path\to\memory\file -Pagefile path\to\page\file -Forensic -v 
+```
+
 ### .\forensic
 Only works with -Forensic
-MemProcFS forensics performs the batch oriented comprehensive analysis tasks
-and outputs the result into a sqlite database and displays the result in the
-forensic sub-directory. Analysis tasks include (but are not limited to):    
+MemProcFS forensics performs the batch oriented comprehensive analysis tasks and outputs the result into a sqlite database and displays the result in the forensic sub-directory. Analysis tasks include (but are not limited to):
  - NTFS MFT scanning.                                                       
  - Timeline analysis of Processes, Registry, NTFS MFT, Plugins and more. 
 ### .\forensic\ntfs
@@ -207,6 +210,26 @@ In order to mount a recovered bitlocker key it's recommended to use dislocker on
 dislocker -k <recovered_key>.fvek /path/to/disk /path/to/dislocker          
 mount /path/to/dislocker/dislocker-file /path/to/mount
 ```
+
+### .\misc\findevil
+Indicators of Evil
+FindEvil is only available on 64-bit Windows 11, 10 and 8.1.
+| Indicator     | Description |
+| ------------- | ----------- |
+| PE_INJECT     | PE_INJECT locates malware by scanning for valid .DLLs and .EXEs with executable pages in their page tables located in a private (non-image) virtual address descriptor. |
+| PEB_MASQ      | PEB_MASQ will flag PEB Masquerading attempts. If PEB_MASQ is detected please investigate further in /sys/proc/proc-v.txt |
+| PEB_BAD_LDR   | BAD_PEB_LDR will flag if no in-process modules are enumerated from the PEB/LDR_DATA structures. |
+| PROC_BAD_DTB  | PROC_BAD_DTB will flag active processes with an invalid DirectoryTableBase (DTB) in the kernel _EPROCESS object. |
+| PROC_NOLINK   | PROC_NOLINK will flag if the process does not exist in the kernel _EPROCESS linked list. |
+| PROC_PARENT   | PROC_PARENT will flag if a well known process has a bad parent process. |
+| PROC_USER     | PROC_USER may trigger if well known processes are executing as a strange user. Example cmd.exe as SYSTEM. |
+| PE_NOLINK     | PE_NOLINK locates malware in image virtual address descriptors which is not linked from the in-process PEB/Ldr lists. |
+| PE_PATCHED    | PE_PATCHED locates malware in image virtual address descriptors which executable pages (in the page tables) differs from kernel prototype memory. |
+| DRIVER_PATH   | DRIVER_PATH flag kernel drivers that are loaded from a non-standard path. DRIVER_PATH also flag if no corresponding module could be located. |
+| PRIVATE_RWX   | PRIVATE_RWX locates malware with read/write/execute (RWX) pages in the page table which belongs to a private memory virtual address descriptor. |
+| NOIMAGE_RWX   | NOIMAGE_RWX locates malware with read/write/execute (RWX) pages in the page table which does not belong to image (module) virtual address descriptors. |
+| PRIVATE_RX    | PRIVATE_RX locates malware with read/execute (RX) pages in the page table which belongs to a private memory virtual address descriptor. |
+| NOIMAGE_RX    | NOIMAGE_RX locates malware with read/execute (RX) pages in the page table which does not belong to image (module) virtual address descriptors. |
 
 ### .\misc\web
 The directory contains web browser related information such as browser history from supported web browsers.
@@ -265,7 +288,99 @@ information about the users on the system.
 ...
 ```
 ## MemProcFS-Analyzer
-MemProcFS-Analyzer is a PowerShell script that mounts the memory file and then runs forensic tools against the mount in an automated fashion.
+MemProcFS-Analyzer is a PowerShell script that mounts the memory file and then runs forensic tools against the mount in an automated fashion. Supports pagefile
+Instead of relying on this script, you could potentially run the elements of the script manually, which would give you more more power in how those tools get run.
+Things that the script checks that don't rely on third party tools:
+- Checking for Suspicious Port Numbers
+	- Source
+		- 3262 (F-Response)
+		- 3389 (RDP)
+		- 4444 (Meterpreter)
+		- 4899 (Radmin-Server (Remote Desktop))
+	- Destination
+		- 20 (FTP)
+		- 21 (FTP)
+		- 3389 (RDP)
+		- 4899 (Radmin-Server (Remote Desktop))
+		- 17301 Radmin-VPN (RvControlSvc.exe)
+		- 8080 (Potential C2)
+		- 8081 (Potential C2)
+		- 9001 (Tor)
+		- 9030 (Tor)
+		- 9150 (Tor)
+- Checking Processes for Unusual Parent-Child Relationships
+	- csrss.exe
+	- LogonUI.exe
+	- lsass.exe
+	- services.exe
+	- smss.exe
+	- spoolsv.exe
+	- svchost.exe
+	- taskhost.exe
+	- taskhostw.exe
+	- userinit.exe
+	- wininit.exe
+	- winlogon.exe
+- Unusual Number of Process Instances (>1)
+	- lsaiso.exe
+	- lsass.exe
+	- lsm.exe
+	- Memory Compression
+	- Registry
+	- services.exe
+	- System
+	- wininit.exe
+- Checking Processes for Unusual User Context
+	```
+ 	# svchost.exe is supposed to run in Session 0 under one of 3 users: SYSTEM, LOCAL SERVICE or NETWORK SERVICE.
+	# If svchost.exe is ran by SYSTEM, NETWORK SERVICE or LOCAL SERVICE, then it should be legitmate, but if it is ran under an user account, 
+	# then you need to investigate if the svchost.exe file is from another location than "C:\Windows\System32". 
+	```			
+- Checking for processes spawned from suspicious folder locations
+	- Desktop
+	- Downloads
+	- Documents
+	- Public
+	- Temp
+	- ALLUSERSPROFILE
+	- C:\
+	- LocalAppData
+	- LocalLow
+	- Roaming
+- Checking for Process Path Masquerading and Process Name Masquerading. Measures the edit distance between used Process Name and Original Windows Process Name
+- Checking for suspicious parent processes
+	- rundll32.exe spawns conhost.exe
+	- svchost.exe spawns cmd.exe
+- Checking for suspicious child processes
+	- WINWORD.EXE spawns cmd.exe
+	- WINWORD.EXE spawns powershell.exe
+	- WINWORD.EXE spawns mshta.exe
+	- WINWORD.EXE spawns regsvr32.exe
+- Checking for processes with suspicious command-line arguments
+	- Powershell
+		- base64 encoded command
+		- WindowStyle Hidden
+		- Execution Policy Bypass
+		- Profile Bypass
+		- NonInteractive Mode
+		- Download
+		- Invoke-Expression
+		- Start-Process
+	- cmd.exe
+    	- The /c parameter is used to terminate the shell after command completion.
+        - The /q parameter is used to turn echo off.
+        - The /k parameter is used to run a command and then remain open (e.g. whoami).
+- Checking for suspicious processes without any command-line arguments
+	- svchost.exe
+	- rundll32.exe
+- Service running from a suspicious folder location: C:\Users\*\AppData\Local\Temp\*
+- Task Scheduler running from a suspicious folder location
+	- C:\Users\*
+	- C:\ProgramData\*
+	- C:\Windows\Temp\*
+	- C:\TMP\*
+- Task Scheduler running using suspicious Scripting Utility
+- Task Scheduler running malicious command line argument
 
 ### AmcacheParser [^amcache]
 [^amcache]:[AmcacheParser](https://thesecuritynoob.com/dfir-tools/dfir-tools-amcacheparser-what-is-it-how-to-use/)
@@ -288,7 +403,8 @@ The Registry Key related to this cache can be found and located as below.
 A Windows Event Log file parser that bypasses the Windows API.  There are a lot of advantages to a tool such as this; specifically by bypassing the API it doesn't succumb to the 'hiccups' that may occur as a result of files that weren't closed properly or for some other reason isn't formatted in a manner the API agrees with. This is especially important for memory forensics.
 
 ### IpInfo CLI
-Takes all public IP addresses found in ``` .\sys\net ``` and generates GeoIP information on them
+Takes all public IP addresses found in ``` .\sys\net ``` and generates GeoIP information on them.
+Consider using [Abeebus](https://github.com/13Cubed/Abeebus) and [Rebeebus](https://github.com/13Cubed/Rebeebus) against this data set too.
 
 ### lnk_parser
 Yara is run against ``` .\forenisc\ntfs\ ``` to pull all .lnk files. lnk_parser then generates a CSV that contains the following items
@@ -323,3 +439,36 @@ It then uses this CSV to hunt for known suspicious/malicious lnk files. These in
 - LNK contains http:// or https://
 - suspicious LNK file size
 - Entropy > 6.5
+
+### RECmd
+RECmd is a command-line tool is useful to access, search and recover, and export any data found in the Windows registry.
+Is the command-line version of GUI app RegistryExplorer, with which it shares the same plugins.
+In this context, the following items are of interest:
+- Syscache 
+- UserAssist 
+- ShellBags 
+- Auto-Start Extensibility Points (ASEPs)
+- RecentDocs, Office Trusted Document
+- BAM
+- MUICache
+
+### SBECmd
+SBECmd allows for processing Shellbags via command-line and can process multiple registry hives simultaneously.
+
+### YARA
+YARA is included in the analyzer but appears to be under-utilized only searching for LNK files. 
+This could be expanded to search for specfic files or strings within the memory dump
+
+### Zircolite
+Zircolite is a standalone tool written in Python 3. It allows to use SIGMA rules on MS Windows EVTX (EVTX and JSONL format), Auditd logs and Sysmon for Linux logs.
+Able to assign MITRE ATT&CK tactics to the event log hits it returns.
+
+### ClamAV
+ClamAV is an open source antivirus engine for detecting trojans, viruses, malware & other malicious threats. 
+
+### 1768.py
+Checks for Cobalt Strike Beacons
+
+## Other Tools
+### Chainsaw
+Chainsaw provides a powerful ‘first-response’ capability to quickly identify threats within Windows forensic artefacts such as Event Logs and MFTs. Chainsaw offers a generic and fast method of searching through event logs for keywords, and by identifying threats using built-in support for Sigma detection rules, and via custom Chainsaw detection rules.
