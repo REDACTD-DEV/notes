@@ -42,21 +42,26 @@ graph TD;
     class runtimebroker.exe layer6
     class taskhostw.exe layer6
 ```
-| Image Name        | Path                                        | Parent                                      | Number of Instances | User Account | Start Time            |
-|-------------------|---------------------------------------------|---------------------------------------------|---------------------|--------------|-----------------------|
-| System            | N/A                                         |                                             | 1                   | SYSTEM       | System boot time      |
-| smss.exe          | %SystemRoot%\System32\smss.exe              | System                                      | 1                   | SYSTEM       | System boot time      |
-| csrss.exe         | %SystemRoot%\System32\csrss.exe             | smss.exe                                    | 1                   | SYSTEM       | System boot time      |
-| wininit.exe       | %SystemRoot%\System32\wininit.exe           | smss.exe                                    | 1                   | SYSTEM       | System boot time      |
-| winlogon.exe      | %SystemRoot%\System32\winlogon.exe          | smss.exe                                    | 1                   | SYSTEM       | User logon time       |
-| services.exe      | %SystemRoot%\System32\services.exe          | wininit.exe                                 | Multiple            | SYSTEM       | System boot time      |
-| lsaiso.exe        | %SystemRoot%\System32\lsaiso.exe            | wininit.exe                                 | 1                   | LOCAL SERVICE| System boot time      |
-| lsass.exe         | %SystemRoot%\System32\lsass.exe             | wininit.exe                                 | 1                   | SYSTEM       | System boot time      |
-| userinit.exe      | %SystemRoot%\System32\userinit.exe          | winlogon.exe                                | 1                   | USER         | User logon time       |
-| svchost.exe       | %SystemRoot%\system32\svchost.exe           | services.exe                                | Multiple            | SYSTEM       | System boot time      |
-| explorer.exe      | %SystemRoot%\explorer.exe                   | userinit.exe                                | 1                   | USER         | User logon time       |
-| runtimebroker.exe | %SystemRoot%\System32\RuntimeBroker.exe     | services.exe                                | 1                   | USER         | User logon time       |
-| taskhostw.exe     | %SystemRoot%\System32\taskhostw.exe         | svchost.exe                                 | Multiple            | USER         | User logon time       |
+- smss.exe: One master instance and another child instance per session. Children exit after creating their session.
+- lsasio.exe: When Credential Guard is enabled, the functionality of lsass.exe is split between two processes –
+itself and lsaiso.exe. Most of the functionality stays within lsass.exe, but the important role of safely storing
+account credentials moves to lsaiso.exe
+
+| Image Name        | Path                                        | Instances           | User Account | Start Time                      |
+|-------------------|---------------------------------------------|---------------------|--------------|---------------------------------|
+| System            | N/A                                         | 1                   | SYSTEM       | System boot time                |
+| smss.exe          | %SystemRoot%\System32\smss.exe              | 1                   | SYSTEM       | System boot time                |
+| csrss.exe         | %SystemRoot%\System32\csrss.exe             | 2 or more           | SYSTEM       | System boot time                |
+| wininit.exe       | %SystemRoot%\System32\wininit.exe           | 1                   | SYSTEM       | System boot time                |
+| winlogon.exe      | %SystemRoot%\System32\winlogon.exe          | 1 or more           | SYSTEM       | User logon time                 |
+| services.exe      | %SystemRoot%\System32\services.exe          | Multiple            | SYSTEM       | System boot time                |
+| lsaiso.exe        | %SystemRoot%\System32\lsaiso.exe            | 0 or 1              | SYSTEM       | System boot time                |
+| lsass.exe         | %SystemRoot%\System32\lsass.exe             | 1                   | SYSTEM       | System boot time                |
+| userinit.exe      | %SystemRoot%\System32\userinit.exe          | 1                   | USER         | User logon time                 |
+| svchost.exe       | %SystemRoot%\system32\svchost.exe           | Multiple            | SYSTEM       | Generally system boot time      |
+| explorer.exe      | %SystemRoot%\explorer.exe                   | 1 per logged in user| USER         | User logon time                 |
+| runtimebroker.exe | %SystemRoot%\System32\RuntimeBroker.exe     | 1                   | USER         | Varies                          |
+| taskhostw.exe     | %SystemRoot%\System32\taskhostw.exe         | Multiple            | USER         | Varies                          |
 
 
 ## Volatility3
