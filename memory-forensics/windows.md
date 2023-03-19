@@ -53,7 +53,7 @@ account credentials moves to lsaiso.exe
 | smss.exe          | %SystemRoot%\System32\smss.exe              | 1                   | SYSTEM       | System boot time                |
 | csrss.exe         | %SystemRoot%\System32\csrss.exe             | 2 or more           | SYSTEM       | System boot time                |
 | wininit.exe       | %SystemRoot%\System32\wininit.exe           | 1                   | SYSTEM       | System boot time                |
-| winlogon.exe      | %SystemRoot%\System32\winlogon.exe          | 1 or more           | SYSTEM       | User logon time                 |
+| winlogon.exe      | %SystemRoot%\System32\winlogon.exe          | 1 or more           | SYSTEM       | System boot time                |
 | services.exe      | %SystemRoot%\System32\services.exe          | Multiple            | SYSTEM       | System boot time                |
 | lsaiso.exe        | %SystemRoot%\System32\lsaiso.exe            | 0 or 1              | SYSTEM       | System boot time                |
 | lsass.exe         | %SystemRoot%\System32\lsass.exe             | 1                   | SYSTEM       | System boot time                |
