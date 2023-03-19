@@ -4,6 +4,61 @@
 Get-FileHash -Algorithm MD5 -Path path\to\memory\dump
 ```
 
+## Windows Process Genealogy
+
+
+```mermaid
+graph TD;
+    System -->smss.exe
+	smss.exe-.->wininit.exe
+	smss.exe-.->winlogon.exe
+	smss.exe-.->csrss.exe
+	wininit.exe-->services.exe
+	wininit.exe-->lsaiso.exe
+	wininit.exe-->lsass.exe
+	services.exe-->svchost.exe
+	svchost.exe-->runtimebroker.exe
+	svchost.exe-->taskhostw.exe
+	winlogon.exe-->userinit.exe
+	userinit.exe-.->explorer.exe;
+	classDef layer1 fill:#F6CCD5,color:#000
+	classDef layer2 fill:#C1C1DE,color:#000
+	classDef layer3 fill:#C7DAEB,color:#000
+	classDef layer4 fill:#D1E6D6,color:#000
+	classDef layer5 fill:#F2EFD5,color:#000
+	classDef layer6 fill:#F0E0D1,color:#000
+	
+	class System layer1
+    class smss.exe layer2
+    class wininit.exe layer3
+    class winlogon.exe layer3
+    class csrss.exe layer3
+    class services.exe layer4
+    class lsaiso.exe layer4
+    class lsass.exe layer4
+    class userinit.exe layer4
+    class svchost.exe layer5
+    class explorer.exe layer5
+    class runtimebroker.exe layer6
+    class taskhostw.exe layer6
+```
+| Image Name        | Path                                        | Parent                                      | Number of Instances | User Account | Start Time            |
+|-------------------|---------------------------------------------|---------------------------------------------|---------------------|--------------|-----------------------|
+| System            | N/A                                         |                                             | 1                   | SYSTEM       | System boot time      |
+| smss.exe          | %SystemRoot%\System32\smss.exe              | System                                      | 1                   | SYSTEM       | System boot time      |
+| csrss.exe         | %SystemRoot%\System32\csrss.exe             | smss.exe                                    | 1                   | SYSTEM       | System boot time      |
+| wininit.exe       | %SystemRoot%\System32\wininit.exe           | smss.exe                                    | 1                   | SYSTEM       | System boot time      |
+| winlogon.exe      | %SystemRoot%\System32\winlogon.exe          | smss.exe                                    | 1                   | SYSTEM       | User logon time       |
+| services.exe      | %SystemRoot%\System32\services.exe          | wininit.exe                                 | Multiple            | SYSTEM       | System boot time      |
+| lsaiso.exe        | %SystemRoot%\System32\lsaiso.exe            | wininit.exe                                 | 1                   | LOCAL SERVICE| System boot time      |
+| lsass.exe         | %SystemRoot%\System32\lsass.exe             | wininit.exe                                 | 1                   | SYSTEM       | System boot time      |
+| userinit.exe      | %SystemRoot%\System32\userinit.exe          | winlogon.exe                                | 1                   | USER         | User logon time       |
+| svchost.exe       | %SystemRoot%\system32\svchost.exe           | services.exe                                | Multiple            | SYSTEM       | System boot time      |
+| explorer.exe      | %SystemRoot%\explorer.exe                   | userinit.exe                                | 1                   | USER         | User logon time       |
+| runtimebroker.exe | %SystemRoot%\System32\RuntimeBroker.exe     | services.exe                                | 1                   | USER         | User logon time       |
+| taskhostw.exe     | %SystemRoot%\System32\taskhostw.exe         | svchost.exe                                 | Multiple            | USER         | User logon time       |
+
+
 ## Volatility3
 
 Windows Info	
