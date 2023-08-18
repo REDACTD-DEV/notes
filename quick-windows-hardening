@@ -1,0 +1,17 @@
+Import the following GPO's:
+Domain Wide
+  - Clear Cached Credentials
+  - LSA RunAsPPL
+  - Install Sysmon (ion-storm)
+  - PowerShell Logging
+  - Kerberos Logging
+  - Disable Insecure Kerberos Encryption Types
+  - Audit User Account Management
+      verify with auditpol /get /category:"account management"
+Workstations
+  - Restrict Scripts
+  - Enable AppLocker
+
+Add Users to Protected Users group
+
+Reroll all creds for privileged users, and reroll creds for krbtgt twice
